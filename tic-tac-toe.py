@@ -1,7 +1,7 @@
 class Coordinate:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    def __init__(self, row, column):
+        self.x = row
+        self.y = column
 
 
 def load_board(size):
@@ -27,16 +27,35 @@ def get_input(brd, nxt):
         print('HIBA: érvénytelen bemenet')
         return get_input(brd, nxt)
 
-    posi = Coordinate(int(coordinates[0]), int(coordinates[1]))
+    row = int(coordinates[0])
+    column = int(coordinates[1])
 
     size = len(brd)
-    if posi.x >= size or posi.x < 0 or posi.y >= size or posi.y < 0:
+    if row >= size or row < 0 or column >= size or column < 0:
         print('HIBA: ilyen pozíció nincs')
         return get_input(brd, nxt)
-    if brd[posi.x][posi.y] != '#':
+    if brd[row][column] != '#':
         print('HIBA: a mező már meg lett jelölve')
         return get_input(brd, nxt)
-    return posi
+    return Coordinate(row, column)
+
+
+def transpose(b):
+    return [[b[j][i] for j in range(len(b))] for i in range(len(b[0]))]
+
+
+def diagonal(b):
+    return [b[i][i] for i in range(len(b))]
+
+
+def any_row_completed(b, player):
+    return any(all(elem == player for elem in row) for row in b)
+
+
+def ended(b, player):
+    return any_row_completed(b, player) \
+           or any_row_completed(transpose(b), player) \
+           or any_row_completed([diagonal(b)], player)
 
 
 if __name__ == '__main__':
@@ -44,9 +63,8 @@ if __name__ == '__main__':
     board = load_board(board_size)
     print_board(board)
 
-    end_of_game = False
     next_player = 'X'
-    while not end_of_game:
+    while not ended(board, next_player):
         position = get_input(board, next_player)
         board[position.x][position.y] = next_player
         print_board(board)
