@@ -40,6 +40,12 @@ def get_input(brd, nxt):
     return Coordinate(row, column)
 
 
+def next_player(curr_player):
+    if curr_player == 'X':
+        return 'O'
+    return 'X'
+
+
 def transpose(b):
     return [[b[j][i] for j in range(len(b))] for i in range(len(b[0]))]
 
@@ -52,20 +58,25 @@ def any_row_completed(b, player):
     return any(all(elem == player for elem in row) for row in b)
 
 
-def ended(b, player):
+def player_wins(b, player):
     return any_row_completed(b, player) \
            or any_row_completed(transpose(b), player) \
            or any_row_completed([diagonal(b)], player)
 
 
+def game_drawn(b):
+    return not any(any(elem == '#' for elem in row) for row in b)
+
+
 if __name__ == '__main__':
+    # todo param
     board_size = 4
     board = load_board(board_size)
     print_board(board)
 
-    next_player = 'X'
-    while not ended(board, next_player):
-        position = get_input(board, next_player)
-        board[position.x][position.y] = next_player
+    current_player = 'O'
+    while not player_wins(board, current_player) and not game_drawn(board):
+        current_player = next_player(current_player)
+        position = get_input(board, current_player)
+        board[position.x][position.y] = current_player
         print_board(board)
-        next_player = 'O'
