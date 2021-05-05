@@ -1,7 +1,20 @@
+import argparse
+
+
 class Coordinate:
     def __init__(self, row, column):
         self.x = row
         self.y = column
+
+
+def get_arg():
+    my_parser = argparse.ArgumentParser(description='tic-tac-toe game')
+    my_parser.add_argument('board_size',
+                           metavar='size of the board',
+                           type=int,
+                           help='board size')
+    args = my_parser.parse_args()
+    return args.board_size
 
 
 def load_board(size):
@@ -59,18 +72,23 @@ def any_row_completed(b, player):
 
 
 def player_wins(b, player):
-    return any_row_completed(b, player) \
-           or any_row_completed(transpose(b), player) \
-           or any_row_completed([diagonal(b)], player)
+    if any_row_completed(b, player) \
+            or any_row_completed(transpose(b), player) \
+            or any_row_completed([diagonal(b)], player):
+        print('Az {} játékos győzött!'.format(player))
+        return True
+    return False
 
 
 def game_drawn(b):
-    return not any(any(elem == '#' for elem in row) for row in b)
+    if not any(any(elem == '#' for elem in row) for row in b):
+        print('Döntetlen!')
+        return True
+    return False
 
 
 if __name__ == '__main__':
-    # todo param
-    board_size = 4
+    board_size = get_arg()
     board = load_board(board_size)
     print_board(board)
 
