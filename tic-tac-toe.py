@@ -1,20 +1,13 @@
 import argparse
 
 
-class Coordinate:
-    def __init__(self, row, column):
-        self.x = row
-        self.y = column
-
-
 def get_arg():
     my_parser = argparse.ArgumentParser(description='tic-tac-toe game')
     my_parser.add_argument('board_size',
                            metavar='size of the board',
                            type=int,
                            help='board size')
-    args = my_parser.parse_args()
-    return args.board_size
+    return my_parser.parse_args().board_size
 
 
 def load_board(size):
@@ -34,23 +27,23 @@ def print_board(board):
         print()
 
 
-def get_input(brd, nxt):
+def get_input(board, nxt):
     coordinates = input("{} következik>".format(nxt)).split(' ')
     if len(coordinates) != 2 or not coordinates[0].isdigit() or not coordinates[1].isdigit():
         print('HIBA: érvénytelen bemenet')
-        return get_input(brd, nxt)
+        return get_input(board, nxt)
 
     row = int(coordinates[0])
     column = int(coordinates[1])
 
-    size = len(brd)
+    size = len(board)
     if row >= size or row < 0 or column >= size or column < 0:
         print('HIBA: ilyen pozíció nincs')
-        return get_input(brd, nxt)
-    if brd[row][column] != '#':
+        return get_input(board, nxt)
+    if board[row][column] != '#':
         print('HIBA: a mező már meg lett jelölve')
-        return get_input(brd, nxt)
-    return Coordinate(row, column)
+        return get_input(board, nxt)
+    return row, column
 
 
 def next_player(curr_player):
@@ -59,42 +52,41 @@ def next_player(curr_player):
     return 'X'
 
 
-def transpose(b):
-    return [[b[j][i] for j in range(len(b))] for i in range(len(b[0]))]
+def transpose(board):
+    return [[board[column][row] for column in range(len(board))] for row in range(len(board[0]))]
 
 
-def diagonal(b):
-    return [b[i][i] for i in range(len(b))]
+def diagonal(board):
+    return [board[i][i] for i in range(len(board))]
 
 
-def any_row_completed(b, player):
-    return any(all(elem == player for elem in row) for row in b)
+def any_row_completed(board, player):
+    return any(all(elem == player for elem in row) for row in board)
 
 
-def player_wins(b, player):
-    if any_row_completed(b, player) \
-            or any_row_completed(transpose(b), player) \
-            or any_row_completed([diagonal(b)], player):
+def player_wins(board, player):
+    if any_row_completed(board, player) \
+            or any_row_completed(transpose(board), player) \
+            or any_row_completed([diagonal(board)], player):
         print('Az {} játékos győzött!'.format(player))
         return True
     return False
 
 
 def game_drawn(b):
-    if not any(any(elem == '#' for elem in row) for row in b):
+    if not any(any(elem == '#' for elem in r) for r in b):
         print('Döntetlen!')
         return True
     return False
 
 
 if __name__ == '__main__':
-    board_size = get_arg()
-    board = load_board(board_size)
-    print_board(board)
+    game_board = load_board(get_arg())
+    print_board(game_board)
 
     current_player = 'O'
-    while not player_wins(board, current_player) and not game_drawn(board):
+    while not player_wins(game_board, current_player) and not game_drawn(game_board):
         current_player = next_player(current_player)
-        position = get_input(board, current_player)
-        board[position.x][position.y] = current_player
-        print_board(board)
+        board_row, col = get_input(game_board, current_player)
+        game_board[board_row][col] = current_player
+        print_board(game_board)
